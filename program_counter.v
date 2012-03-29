@@ -2,9 +2,9 @@
 `define RESET_STYLE
 `endif
 
-module program_counter 
-#(`include "pic_params.v" )
-(
+module program_counter #(
+`include "pic_params.v" 
+) (
 input wire clk,
 input wire rst,
 output reg [L2_PIC_INSTR_MEM_DEPTH-1:0] pc,
@@ -18,18 +18,18 @@ input wire skip
 );
 
 
-always @(posedge clk `RESET_STYLE) begin
-if (rst) begin
-pc <= 0;
-{q1, q2, q3, q4} <= {4'b1000};
-end else begin
-{q1, q2, q3, q4} <= {q4, q1, q2, q3};
-if (q4) begin 
-if (goto_enable) pc <= goto_addr;
-else if (skip) pc <= pc + 2;
-else pc <= pc + 1;
-end
-end
-end
+   always @(posedge clk `RESET_STYLE) begin
+      if (rst) begin
+         pc <= 0;
+         {q1, q2, q3, q4} <= {4'b1000};
+      end else begin
+         {q1, q2, q3, q4} <= {q4, q1, q2, q3};
+         if (q4) begin 
+            if (goto_enable) pc <= goto_addr;
+            else if (skip) pc <= pc + 2;
+            else pc <= pc + 1;
+         end
+      end
+   end
 
 endmodule
