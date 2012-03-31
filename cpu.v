@@ -8,11 +8,14 @@
 module cpu #(
 `include "pic_params.v"
 ) (
-    input wire clk,
-    input wire rst,
-    output wire [DWIDTH*NUM_EXPOSED_REGS-1:0] exposed_reg_file
+    input  wire                                clk,
+    input  wire                                rst,
+    input  wire [L2_PIC_INSTR_MEM_DEPTH-1:0]   waddr,
+    input  wire [PIC_INSTR_WIDTH-1:0]          wdata,
+    input  wire                                program_mode,
+    input  wire                                we, 
+    output wire [DWIDTH*NUM_EXPOSED_REGS-1:0]  exposed_reg_file
 );
-
 
    wire [PIC_INSTR_WIDTH-1:0]                 instruction;
    wire [L2_PIC_INSTR_MEM_DEPTH-1:0]          pc;
@@ -22,6 +25,7 @@ module cpu #(
    wire                                       goto_enable;
    wire                                       status_carry, status_digit_carry, status_zero;
    wire                                       skip;
+
    program_counter 
      program_counter 
        (
@@ -37,15 +41,13 @@ module cpu #(
         .skip(skip)
         );
 
-
    instr_mem
-     instr_mem
-       (
-        .clk(clk), 
-        .addr(pc),
-        .wdata(0),
-        .we(0),
-        .instruction(instruction)
+     instr_mem (
+        .clk            (clk), 
+        .addr           (program_mode ? waddr : pc),
+        .wdata          (wdata),
+        .we             (we),
+        .instruction    (instruction)
         );      
 
    wire [ALU_INST_WIDTH-1:0]                  alu_instruction;
@@ -57,8 +59,6 @@ module cpu #(
    wire [DWIDTH-1:0]                          dbus_o_s;
    wire                                       freg_wen;
    wire [DWIDTH-1:0]                          dbus_i_s;
-
-
 
    instr_decode
      instr_decode
